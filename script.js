@@ -6,19 +6,12 @@ const form = document.getElementById('form');
 const text = document.getElementById('text');
 const amount = document.getElementById('amount');
 
-// const dummyTransactions = [
-//   { id: 1, text: 'Flower', amount: -20 },
-//   { id: 2, text: 'Salary', amount: 300 },
-//   { id: 3, text: 'Book', amount: -10 },
-//   { id: 4, text: 'Camera', amount: 150 },
-// ];
-
 const localStorageTransactions = JSON.parse(localStorage.getItem('transactions'));
 
 let transactions = localStorage.getItem('transactions') !== null ?
   localStorageTransactions : [];
 
-// Add transaction
+// 取引履歴を追加
 function addTrandaction(e) {
   e.preventDefault();
 
@@ -44,12 +37,12 @@ function addTrandaction(e) {
   }
 }
 
-// Generate random ID
+// ランダムIDを作成
 function generateID() {
   return Math.floor(Math.random() * 10000000);
 }
 
-// Add transactions to DOM list
+// DOMリストに追加
 function addTransactionDOM(transaction) {
   const sign = transaction.amount < 0 ? '-' : '+';
 
@@ -57,33 +50,34 @@ function addTransactionDOM(transaction) {
 
   item.classList.add(transaction.amount < 0 ? 'minus' : 'plus');
 
-  item.innerHTML = `${transaction.text} <span>${sign}${Math.abs(transaction.amount)}</span><button class="delete-btn" onclick="removeTransaction(${transaction.id})">x</button>`;
+  item.innerHTML = `${transaction.text} <span>${sign}${Math.abs(transaction.amount).toLocaleString()}</span><button class="delete-btn" onclick="removeTransaction(${transaction.id})">x</button>`;
 
   list.appendChild(item);
 }
 
-// Update the balance
+// 残高を更新
 function updateValues() {
   const amounts = transactions.map(transaction => transaction.amount);
 
-  const total = amounts.reduce((acc, item) => (acc += item), 0).toFixed(2);
+  const total = amounts.reduce((acc, item) => (acc += item), 0).toLocaleString();
 
   const income = amounts
     .filter(item => item > 0)
     .reduce((acc, item) => (acc += item), 0)
-    .toFixed(2);
+    .toLocaleString()
 
   const expense = (
     amounts
       .filter(item => item < 0)
-      .reduce((acc, item) => (acc += item), 0) * -1).toFixed(2);
+      .reduce((acc, item) => (acc += item), 0) * -1)
+    .toLocaleString();
 
-  balance.innerText = `$${total}`;
-  money_plus.innerText = `$${income}`;
-  money_minus.innerText = `$${expense}`;
+  balance.innerText = `${total}円`;
+  money_plus.innerText = `${income}円`;
+  money_minus.innerText = `${expense}円`;
 }
 
-// Remove transaction by ID
+// IDでフィルターしてからレコード削除
 function removeTransaction(id) {
   transactions = transactions.filter(transaction => transaction.id !== id);
 
@@ -92,7 +86,7 @@ function removeTransaction(id) {
   init();
 }
 
-// Update local storage transactions
+// local storageに追加
 function updateLocalStorage() {
   localStorage.setItem('transactions', JSON.stringify(transactions));
 }
@@ -108,3 +102,82 @@ function init() {
 init();
 
 form.addEventListener('submit', addTrandaction);
+
+document.addEventListener('DOMContentLoaded', function () {
+  Highcharts.chart('container', {
+    chart: {
+      plotBackgroundColor: null,
+      plotBorderWidth: null,
+      plotShadow: false,
+      type: 'pie'
+    },
+    title: {
+      text: 'Browser market shares in January, 2018'
+    },
+    tooltip: {
+      pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+    accessibility: {
+      point: {
+        valueSuffix: '%'
+      }
+    },
+    responsive: {
+      rules: [{
+        condition: {
+          maxWidth: 500
+        },
+        chartOptions: {
+          legend: { enabled: false }
+        }
+      }]
+    },
+    plotOptions: {
+      pie: {
+        allowPointSelect: true,
+        cursor: 'pointer',
+        dataLabels: {
+          enabled: true,
+          format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+        }
+      }
+    },
+    series: [{
+      name: 'Brands',
+      colorByPoint: true,
+      data: [{
+        name: 'Chrome',
+        y: 61.41,
+        sliced: true,
+        selected: true
+      }, {
+        name: 'Internet Explorer',
+        y: 11.84
+      }, {
+        name: 'Firefox',
+        y: 10.85
+      }, {
+        name: 'Edge',
+        y: 4.67
+      }, {
+        name: 'Safari',
+        y: 4.18
+      }, {
+        name: 'Sogou Explorer',
+        y: 1.64
+      }, {
+        name: 'Opera',
+        y: 1.6
+      }, {
+        name: 'QQ',
+        y: 1.2
+      }, {
+        name: 'Other',
+        y: 2.61
+      }]
+    }]
+  });
+
+
+});
+
